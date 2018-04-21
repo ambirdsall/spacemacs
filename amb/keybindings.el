@@ -1,13 +1,12 @@
 (unless (display-graphic-p)
-  (progn
+    (with-eval-after-load 'org
     (let ((map (if (boundp 'input-decode-map)
                    input-decode-map
                  function-key-map)))
-      (define-key map "\e[1;P9" (kbd "C-RET"))
-      (define-key org-mode-map (kbd "C-RET") #'amb/org-new-heading)
-      (define-key map "\e[1;P10" (kbd "C-S-RET"))
-      (define-key org-mode-map (kbd "C-S-RET") #'amb/org-new-subheading)
-      )))
+       (define-key map "\e[1;P9" (kbd "C-RET"))
+       (define-key org-mode-map (kbd "C-RET") #'amb/org-new-heading)
+       (define-key map "\e[1;P10" (kbd "C-S-RET"))
+       (define-key org-mode-map (kbd "C-S-RET") #'amb/org-new-subheading))))
 
 (global-set-key (kbd "C->") 'mc/mark-next-like-this)
 (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
@@ -82,15 +81,16 @@
 (define-key Info-mode-map (kbd "<left>") #'Info-backward-node)
 (define-key Info-mode-map (kbd "<right>") #'Info-forward-node)
 
-(define-key org-mode-map (kbd "<up>") #'previous-line)
-(define-key org-mode-map (kbd "<down>") #'next-line)
-;; (define-key org-mode-map (kbd "<") #'evil-shift-left)
-;; (define-key org-mode-map (kbd ">") #'evil-shift-right)
-(define-key org-mode-map (kbd "?") #'self-insert-command) ; what the fuck, discover.el
-(define-key org-mode-map (kbd "<C-S-return>") #'amb/org-insert-subheading-respect-content)
-(spacemacs/set-leader-keys-for-major-mode 'org-mode
-  "hs" #'amb/org-insert-subheading-respect-content
-  "hi" #'org-insert-heading-after-current)
+(with-eval-after-load 'org
+ (define-key org-mode-map (kbd "<up>") #'previous-line)
+ (define-key org-mode-map (kbd "<down>") #'next-line)
+ ;; (define-key org-mode-map (kbd "<") #'evil-shift-left)
+ ;; (define-key org-mode-map (kbd ">") #'evil-shift-right)
+ (define-key org-mode-map (kbd "?") #'self-insert-command) ; what the fuck, discover.el
+ (define-key org-mode-map (kbd "<C-S-return>") #'amb/org-insert-subheading-respect-content)
+ (spacemacs/set-leader-keys-for-major-mode 'org-mode
+   "hs" #'amb/org-insert-subheading-respect-content
+   "hi" #'org-insert-heading-after-current))
 
 ;; MACRO DEFINITIONS
 (fset 'import-definition-builder
