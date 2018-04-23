@@ -8,9 +8,13 @@
        (define-key map "\e[1;P10" (kbd "C-S-RET"))
        (define-key org-mode-map (kbd "C-S-RET") #'amb/org-new-subheading))))
 
-(global-set-key (kbd "C->") 'mc/mark-next-like-this)
-(global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
-(global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
+(if (display-graphic-p)
+    (progn
+     (global-set-key (kbd "M-<down>") #'move-current-line)
+     (global-set-key (kbd "M-<up>") (lambda () (interactive) (move-current-line -1))))
+  (progn
+    (global-set-key (kbd "ESC <down>") #'move-current-line)
+    (global-set-key (kbd "ESC <up>") (lambda () (interactive) (move-current-line -1)))))
 
 ;; (global-set-key (kbd "<C-return>") 'open-line-below)
 ;; (global-set-key (kbd "<C-S-return>") 'open-line-above)
