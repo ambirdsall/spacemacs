@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (require 'whitespace)
 (setq whitespace-display-mappings
       ;; all numbers are Unicode codepoint in decimal. try (insert-char 182 ) to see it

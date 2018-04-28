@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (unless (display-graphic-p)
     (with-eval-after-load 'org
     (let ((map (if (boundp 'input-decode-map)

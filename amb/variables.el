@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (setq auto-save-default nil)
 (setq bart-manage-window t)
 (setq bart-station '24th)

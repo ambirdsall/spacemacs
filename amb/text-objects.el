@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (defmacro define-and-bind-text-object (key start-regex end-regex)
   (let ((inner-name (make-symbol "inner-name"))
         (outer-name (make-symbol "outer-name")))

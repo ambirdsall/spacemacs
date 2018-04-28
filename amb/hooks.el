@@ -1,3 +1,5 @@
+;;; -*- lexical-binding: t -*-
+
 (add-hook 'dired-mode-hook 'amb/dired-mode-setup)
 (add-hook 'org-babel-after-execute-hook 'amb/fix-inline-images)
 (add-hook 'outline-minor-mode-hook 'outshine-hook-function)
