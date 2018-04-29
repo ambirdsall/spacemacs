@@ -11,7 +11,7 @@
 (setq whitespace-style '(face tabs trailing tab-mark))
 (set-face-attribute 'whitespace-tab nil
                     :background "#272727"
-                    :foreground "#494949"
+                    :foreground "#383838"
                     :weight 'normal)
 (set-face-attribute 'whitespace-trailing nil
                     :background "#e4eeff"
