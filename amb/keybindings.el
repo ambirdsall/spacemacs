@@ -18,8 +18,8 @@
     (global-set-key (kbd "ESC <down>") #'move-current-line)
     (global-set-key (kbd "ESC <up>") (lambda () (interactive) (move-current-line -1)))))
 
-;; (global-set-key (kbd "<C-return>") 'open-line-below)
-;; (global-set-key (kbd "<C-S-return>") 'open-line-above)
+(global-set-key (kbd "<C-return>") 'open-line-below)
+(global-set-key (kbd "<C-S-return>") 'open-line-above)
 
 (eval-after-load 'multiple-cursors-mode
   (lambda () (define-key mc/keymap (kbd "<return>") nil))) ; With multiple cursors, <return> inserts newline; C-g exits multiple-cursors-mode
@@ -70,7 +70,9 @@
   "hm" #'woman
   "hs" #'helm-imenu
   "jj" #'evil-avy-goto-char-2
-  "jJ" #'evil-avy-goto-char)
+  "jJ" #'evil-avy-goto-char
+  "ww" #'ace-window
+  "wW" #'other-window)
 
 (with-eval-after-load 'dired
   (evilified-state-evilify dired-mode dired-mode-map
