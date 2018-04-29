@@ -6,6 +6,7 @@
 (defalias 'atom? 'atom)
 (defalias 'buffer? 'bufferp)
 (defalias 'cons? 'consp)
+(defalias 'display-graphic? 'display-graphic-p)
 (defalias 'frame? 'framep)
 (defalias 'list? 'listp)
 (defalias 'null? 'null)
