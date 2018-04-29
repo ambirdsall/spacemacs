@@ -95,7 +95,6 @@
  (define-key org-mode-map (kbd "<down>") #'next-line)
  ;; (define-key org-mode-map (kbd "<") #'evil-shift-left)
  ;; (define-key org-mode-map (kbd ">") #'evil-shift-right)
- (define-key org-mode-map (kbd "?") #'self-insert-command) ; what the fuck, discover.el
  (define-key org-mode-map (kbd "<C-S-return>") #'amb/org-insert-subheading-respect-content)
  (spacemacs/set-leader-keys-for-major-mode 'org-mode
    "hs" #'amb/org-insert-subheading-respect-content
