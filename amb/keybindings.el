@@ -34,6 +34,7 @@
   "oen" #'amb/edit-ngts-todos
   "oev" #'amb/edit-variables
   "fev" #'amb/edit-variables
+  "fee" #'amb/pick-an-elisp-file-why-dont-ya
   "oet" #'amb/edit-text-objects
   "oes" #'amb/edit-sigfig-notes
   "oek" #'amb/edit-keybindings

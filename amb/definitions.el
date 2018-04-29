@@ -206,16 +206,20 @@ If called with a prefix arg, restricts to open buffers; by default, any file."
 (fset 'amb/open-agenda-file (find-file-as-command "~/notes/agenda.org"))
 (fset 'amb/edit-sigfig-notes (find-file-as-command "~/notes/sigfig.org"))
 
-(defun amb/pick-a-note-why-dont-ya (_prefix)
-  (interactive "P")
-  (helm :sources `((name . "NOTES")
-                   (candidates . ,(-map (lambda (f)
-                                          `(,(f-relative f "/Users/abirdsall/notes") . ,f))
-                                        (f-files "~/notes"
-                                                 (lambda (g) (not (s-matches? "\.DS_Store" g))))))
-                   (action . (lambda (c)
-                               (if current-prefix-arg (split-window-right-and-focus))
-                               (find-file c))))))
+(defmacro helm-edit-file-from-directory (helm-title dir)
+  `(lambda (_prefix)
+     (interactive "P")
+     (helm :sources `((name . ,,helm-title)
+                      (candidates . ,(-map (lambda (f)
+                                             `(,(f-relative f ,dir) . ,f))
+                                           (f-files ,dir
+                                                    (lambda (g) (not (s-matches? "\.DS_Store" g))))))
+                      (action . (lambda (c)
+                                  (if current-prefix-arg (split-window-right-and-focus))
+                                  (find-file c)))))))
+
+(fset 'amb/pick-a-note-why-dont-ya (helm-edit-file-from-directory "NOTES" "/Users/abirdsall/notes"))
+(fset 'amb/pick-an-elisp-file-why-dont-ya (helm-edit-file-from-directory "elisp files" "/Users/abirdsall/.emacs.d/amb"))
 
 (defmacro on-string-or-region (fn)
   `(lambda (string &optional from to)
