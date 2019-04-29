@@ -120,16 +120,34 @@ jobs:
     working_directory: ~/.emacs.d
     <<: *spacemacs_steps
 
-  # Formatting
-  "Formatting (optional)":
+  "CHANGELOG.develop updated (optional)":
     docker:
       - image: jare/spacemacs-circleci:latest
     working_directory: ~/.emacs.d
     steps:
       - checkout
       - run:
-          name: Check updated files formatting
-          command: ./.circleci/format
+          name: Select changed files
+          command: ./.circleci/select
+      - run:
+          name: Check CHANGELOG.develop
+          command: ./.circleci/PR_changelong
+
+  "Validate Documentation (required)":
+    docker:
+      - image: jare/spacemacs-circleci:latest
+    working_directory: ~/.emacs.d
+    steps:
+      - checkout
+      - run:
+          name: Select changed files
+          command: ./.circleci/select
+      - run:
+          name: export changed documentation files for validation
+          command: ./.circleci/validoc/export
+      - run:
+          name: validating changed documentation files
+          command: ./.circleci/validoc/validate
 
 workflows:
   version: 2
@@ -160,6 +178,9 @@ workflows:
       - "spacemacs dist. Emacs snapshot (optional)":
           requires:
             - "Validate PR"
-      - "Formatting (optional)":
+      - "Validate Documentation (required)":
+          requires:
+            - "Validate PR"
+      - "CHANGELOG.develop updated (optional)":
           requires:
             - "Validate PR"

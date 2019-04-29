@@ -58,7 +58,7 @@ A COUNT argument matches the indentation to the next COUNT lines."
 
 ;; from Prelude
 ;; TODO: dispatch these in the layers
-(defvar spacemacs-indent-sensitive-modes
+(defcustom spacemacs-indent-sensitive-modes
   '(asm-mode
     coffee-mode
     elm-mode
@@ -71,7 +71,15 @@ A COUNT argument matches the indentation to the next COUNT lines."
     makefile-imake-mode
     python-mode
     yaml-mode)
-  "Modes for which auto-indenting is suppressed.")
+  "Modes for which auto-indenting is suppressed."
+  :type 'list
+  :group 'spacemacs)
+
+(defcustom spacemacs-yank-indent-modes '(latex-mode)
+  "Modes in which to indent regions that are yanked (or yank-popped).
+Only modes that don't derive from `prog-mode' should be listed here."
+  :type 'list
+  :group 'spacemacs)
 
 (defcustom spacemacs-yank-indent-threshold 1000
   "Threshold (# chars) over which indentation does not automatically occur."
@@ -105,27 +113,27 @@ automatically applied to."
 (defun spacemacs/indent-region-or-buffer ()
   "Indent a region if selected, otherwise the whole buffer."
   (interactive)
-  (unless (member major-mode spacemacs-indent-sensitive-modes)
-    (save-excursion
-      (if (region-active-p)
-          (progn
-            (indent-region (region-beginning) (region-end))
-            (message "Indented selected region."))
+  (save-excursion
+    (if (region-active-p)
         (progn
-          (evil-indent (point-min) (point-max))
-          (message "Indented buffer.")))
-      (whitespace-cleanup))))
+          (indent-region (region-beginning) (region-end))
+          (message "Indented selected region."))
+      (progn
+        (evil-indent (point-min) (point-max))
+        (message "Indented buffer.")))
+    (whitespace-cleanup)))
 
 ;; from https://gist.github.com/3402786
 (defun spacemacs/toggle-maximize-buffer ()
   "Maximize buffer"
   (interactive)
-  (if (and (= 1 (length (window-list)))
-           (assoc ?_ register-alist))
-      (jump-to-register ?_)
-    (progn
-      (window-configuration-to-register ?_)
-      (delete-other-windows))))
+  (save-excursion
+    (if (and (= 1 (length (window-list)))
+             (assoc ?_ register-alist))
+        (jump-to-register ?_)
+      (progn
+        (window-configuration-to-register ?_)
+        (delete-other-windows)))))
 
 ;; https://tsdh.wordpress.com/2007/03/28/deleting-windows-vertically-or-horizontally/
 (defun spacemacs/maximize-horizontally ()
@@ -275,32 +283,47 @@ Dedicated (locked) windows are left untouched."
 
 When NEW-FILENAME is not specified, asks user for a new name.
 
-Also renames associated buffer (if any exists), invalidates
-projectile cache when it's possible and update recentf list."
+Also renames associated buffers (if any exists), invalidates
+projectile cache and updates recentf list."
   (interactive "f")
   (when (and filename (file-exists-p filename))
-    (let* ((buffer (find-buffer-visiting filename))
-           (short-name (file-name-nondirectory filename))
-           (new-name (if new-filename new-filename
-                       (read-file-name
-                        (format "Rename %s to: " short-name)))))
-      (cond ((get-buffer new-name)
-             (error "A buffer named '%s' already exists!" new-name))
-            (t
-             (let ((dir (file-name-directory new-name)))
-               (when (and (not (file-exists-p dir)) (yes-or-no-p (format "Create directory '%s'?" dir)))
-                 (make-directory dir t)))
-             (rename-file filename new-name 1)
-             (when buffer
-               (kill-buffer buffer)
-               (find-file new-name))
-             (when (fboundp 'recentf-add-file)
-               (recentf-add-file new-name)
-               (recentf-remove-if-non-kept filename))
-             (when (and (configuration-layer/package-used-p 'projectile)
-                        (projectile-project-p))
-               (call-interactively #'projectile-invalidate-cache))
-             (message "File '%s' successfully renamed to '%s'" short-name (file-name-nondirectory new-name)))))))
+    (let* ((is-dir (file-directory-p filename))
+           (short-name
+            (if is-dir
+                (file-name-base (directory-file-name filename))
+              (file-name-nondirectory filename)))
+           (new-filename
+            (if new-filename new-filename
+              (read-file-name
+               (format "Rename %s to: " short-name)))))
+
+      ;; Rename filename to new-filename and error if new-filename already
+      ;; exists. `dired-rename-file' handles renaming of directories and files.
+      ;; It updates the name of all associated buffers.
+      (dired-rename-file filename new-filename nil)
+
+      ;; Update recentf list.
+      (when (fboundp 'recentf-add-file)
+        (seq-map
+         (lambda (fp)
+           (recentf-add-file
+            (concat new-filename (string-remove-prefix filename fp)))
+           (recentf-remove-if-non-kept fp))
+         (seq-filter
+          (lambda (fp)
+            (string-prefix-p filename fp))
+          recentf-list)))
+
+      ;; Invalidate projectile cache.
+      (when (and (configuration-layer/package-used-p 'projectile)
+                 (projectile-project-p))
+        (call-interactively #'projectile-invalidate-cache))
+
+      ;; Inform user about tremendous success.
+      (message "%s '%s' successfully renamed to '%s'"
+               (if is-dir "Directory" "File")
+               short-name
+               (file-name-nondirectory new-filename)))))
 
 ;; from magnars
 (defun spacemacs/rename-current-buffer-file (&optional arg)
@@ -309,7 +332,7 @@ If the buffer isn't visiting a file, ask if it should
 be saved to a file, or just renamed.
 
 If called without a prefix argument, the prompt is
-initialized with the current filename."
+initialized with the current directory instead of filename."
   (interactive "P")
   (let* ((name (buffer-name))
          (filename (buffer-file-name)))
@@ -344,7 +367,8 @@ initialized with the current filename."
                                (format
                                 (concat "Buffer '%s' is not visiting a file: "
                                         "[s]ave to file or [r]ename buffer?")
-                                name) 'face 'minibuffer-prompt)))
+                                name)
+                               'face 'minibuffer-prompt)))
           (cond ((eq key ?s)            ; save to file
                  ;; this allows for saving a new empty (unmodified) buffer
                  (unless (buffer-modified-p) (set-buffer-modified-p t))
@@ -355,7 +379,8 @@ initialized with the current filename."
                      ;; ask to rename again, if the new buffer name exists
                      (if (yes-or-no-p
                           (format (concat "A buffer named '%s' already exists: "
-                                          "Rename again?") new-name))
+                                          "Rename again?")
+                                  new-name))
                          (setq new-name (read-string "New buffer name: "))
                        (keyboard-quit)))
                    (rename-buffer new-name)
@@ -400,13 +425,16 @@ FILENAME is deleted using `spacemacs/delete-file' function.."
         (name (buffer-name)))
     (if (not (and filename (file-exists-p filename)))
         (ido-kill-buffer)
-      (when (yes-or-no-p "Are you sure you want to delete this file? ")
-        (delete-file filename t)
-        (kill-buffer buffer)
-        (when (and (configuration-layer/package-used-p 'projectile)
-                   (projectile-project-p))
-          (call-interactively #'projectile-invalidate-cache))
-        (message "File '%s' successfully removed" filename)))))
+      (if (yes-or-no-p
+            (format "Are you sure you want to delete this file: '%s'?" name))
+          (progn
+            (delete-file filename t)
+            (kill-buffer buffer)
+            (when (and (configuration-layer/package-used-p 'projectile)
+                       (projectile-project-p))
+              (call-interactively #'projectile-invalidate-cache))
+            (message "File deleted: '%s'" filename))
+        (message "Canceled: File deletion")))))
 
 ;; from magnars
 (defun spacemacs/sudo-edit (&optional arg)
@@ -962,18 +990,6 @@ toggling fullscreen."
 		 'maximized)
 	   'fullboth)))))
 
-;; taken from Prelude: https://github.com/bbatsov/prelude
-(defmacro spacemacs|advise-commands (advice-name commands class &rest body)
-  "Apply advice named ADVICE-NAME to multiple COMMANDS.
-The body of the advice is in BODY."
-  `(progn
-     ,@(mapcar (lambda (command)
-                 `(defadvice ,command
-                      (,class ,(intern (format "%S-%s" command advice-name))
-                              activate)
-                    ,@body))
-               commands)))
-
 (defun spacemacs/safe-revert-buffer ()
   "Prompt before reverting the file."
   (interactive)
@@ -1292,21 +1308,26 @@ Compare them on count first,and in case of tie sort them alphabetically."
   (if (<= (- end beg) spacemacs-yank-indent-threshold)
       (indent-region beg end nil)))
 
-(spacemacs|advise-commands
- "indent" (yank yank-pop evil-paste-before evil-paste-after) around
- "If current mode is not one of spacemacs-indent-sensitive-modes
- indent yanked text (with universal arg don't indent)."
- (evil-start-undo-step)
- ad-do-it
- (if (and (not (equal '(4) (ad-get-arg 0)))
-          (not (member major-mode spacemacs-indent-sensitive-modes))
-          (or (derived-mode-p 'prog-mode)
-              (member major-mode spacemacs-indent-sensitive-modes)))
-     (let ((transient-mark-mode nil)
-           (save-undo buffer-undo-list))
-       (spacemacs/yank-advised-indent-function (region-beginning)
-                                               (region-end))))
- (evil-end-undo-step))
+(defun spacemacs//yank-indent-region (yank-func &rest args)
+  "If current mode is not one of spacemacs-indent-sensitive-modes
+indent yanked text (with universal arg don't indent)."
+  (evil-start-undo-step)
+  (let ((prefix (car args))
+        (enable (and (not (member major-mode spacemacs-indent-sensitive-modes))
+                     (or (derived-mode-p 'prog-mode)
+                         (member major-mode spacemacs-yank-indent-modes)))))
+    (when (and enable (equal '(4) prefix))
+      (setq args (cdr args)))
+    (apply yank-func args)
+    (when (and enable (not (equal '(4) prefix)))
+      (let ((transient-mark-mode nil)
+            (save-undo buffer-undo-list))
+        (spacemacs/yank-advised-indent-function (region-beginning)
+                                                (region-end)))))
+  (evil-end-undo-step))
+
+(dolist (func '(yank yank-pop evil-paste-before evil-paste-after))
+  (advice-add func :around #'spacemacs//yank-indent-region))
 
 ;; find file functions in split
 (defun spacemacs//display-in-split (buffer alist)

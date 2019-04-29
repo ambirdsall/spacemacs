@@ -1967,7 +1967,7 @@ RNAME is the name symbol of another existing layer."
     (if (file-directory-p location)
         (file-name-as-directory location)
       (configuration-layer//warning
-       "Location path for package %S does not exists (value: %s)."
+       "Location path for package %S does not exist (value: %s)."
        pkg-name location)
       nil))
    ((eq 'local location)
@@ -2112,7 +2112,7 @@ to update."
             (sort (mapcar 'symbol-name update-packages) 'string<))
       (if (and (not no-confirmation)
                (not (yes-or-no-p
-                     (format "Do you want to update %s package(s) ? "
+                     (format "Do you want to update %s package(s)? "
                              upgrade-count))))
           (spacemacs-buffer/append "Packages update has been cancelled.\n" t)
         ;; backup the package directory and construct an alist
@@ -2421,10 +2421,7 @@ depends on it."
   (let ((layer-name
          (intern (completing-read
                   "Choose a used layer"
-                  (sort configuration-layer--used-layers
-                        (lambda (x y)
-                          (string< (oref (cdr x) :name)
-                                   (oref (cdr y) :name))))))))
+                  (sort (copy-list configuration-layer--used-layers) #'string<)))))
     (let ((mode-exts (configuration-layer//lazy-install-extensions-for-layer
                       layer-name)))
       (dolist (x mode-exts)
@@ -2649,8 +2646,13 @@ ELPA stable repository."
       (when untar
         (spacemacs-buffer/set-mode-line
          (format "Extracting %s archive..." name) t)
-        (tar-mode)
-        (tar-untar-buffer)))
+        (if (and (spacemacs/system-is-mswindows)
+                 (not (executable-find "tar")))
+            (progn
+              (configuration-layer//error
+                (concat "Error: Cannot find tar executable in you PATH.\n"
+                  "Spacelpa installation has been skipped!")))
+          (call-process "tar" nil nil nil "-xzf" archive))))
     untar))
 
 (defun configuration-layer/stable-elpa-download-tarball ()

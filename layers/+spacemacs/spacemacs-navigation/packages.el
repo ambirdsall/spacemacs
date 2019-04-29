@@ -68,7 +68,7 @@
             ahs-inhibit-face-list nil
             spacemacs--symbol-highlight-transient-state-doc "
  %s
- [_n_] next   [_N_/_p_] prev  [_d_/_D_] next/prev def  [_r_] range  [_R_] reset
+ [_n_] next   [_N_/_p_] prev  [_d_/_D_] next/prev def  [_r_] range  [_R_] reset  [_z_] recenter
  [_e_] iedit")
 
       ;; since we are creating our own maps,
@@ -136,6 +136,8 @@
         ("p" spacemacs/quick-ahs-backward)
         ("R" ahs-back-to-start)
         ("r" ahs-change-range)
+        ("z" (progn (recenter-top-bottom)
+                    (spacemacs/symbol-highlight)))
         ("q" nil :exit t)))))
 
 (defun spacemacs-navigation/init-centered-cursor-mode ()
@@ -232,6 +234,7 @@
                    "gdb-inferior-io-mode"
                    "gdb-disassembly-mode"
                    "gdb-memory-mode"
+                   "ranger-mode"
                    "speedbar-mode"))
 
         (add-to-list 'golden-ratio-exclude-modes m))
@@ -354,7 +357,7 @@
       "qr" 'spacemacs/restart-emacs-resume-layouts
       "qR" 'spacemacs/restart-emacs
       "qt" 'spacemacs/restart-emacs-timed-requires
-      "qt" 'spacemacs/restart-emacs-adv-timers)))
+      "qT" 'spacemacs/restart-emacs-adv-timers)))
 
 (defun spacemacs-navigation/init-smooth-scrolling ()
   (setq scroll-preserve-screen-position t

@@ -10,11 +10,13 @@
 ;;; License: GPLv3
 
 (defconst treemacs-packages
-  '(golden-ratio
+  '(
+    golden-ratio
     treemacs
     (treemacs-evil :toggle (memq dotspacemacs-editing-style '(vim hybrid)))
     treemacs-projectile
-    winum))
+    winum
+    ))
 
 (defun treemacs/pre-init-golden-ratio ()
   (spacemacs|use-package-add-hook golden-ratio
@@ -41,6 +43,8 @@
             treemacs-never-persist nil
             treemacs-goto-tag-strategy 'refetch-index
             treemacs-collapse-dirs treemacs-use-collapsed-directories)
+      (add-hook 'treemacs-mode-hook
+                #'spacemacs/treemacs-setup-width-lock)
       (spacemacs/set-leader-keys
         "ft"    'treemacs
         "fB"    'treemacs-bookmark
@@ -62,9 +66,10 @@
         (treemacs-follow-mode t))
       (when treemacs-use-filewatch-mode
         (treemacs-filewatch-mode t))
-      (when (memq treemacs-use-git-mode '(simple extended))
+      (when (memq treemacs-use-git-mode '(simple extended deferred))
         (treemacs-git-mode treemacs-use-git-mode))
-      (add-to-list 'spacemacs-window-split-ignore-prefixes treemacs--buffer-name-prefix))))
+      (add-to-list 'spacemacs-window-split-ignore-prefixes
+                   treemacs--buffer-name-prefix))))
 
 (defun treemacs/init-treemacs-evil ()
   (use-package treemacs-evil
@@ -82,4 +87,8 @@
     (progn
       ;; window 0 is reserved for file trees
       (spacemacs/set-leader-keys "0" 'treemacs-select-window)
-      (define-key winum-keymap (kbd "M-0") 'treemacs-select-window))))
+      (define-key winum-keymap (kbd "M-0") 'treemacs-select-window)
+      (with-eval-after-load 'treemacs
+        (dolist (n (number-sequence 1 5))
+          (add-to-list 'winum-ignored-buffers
+                       (format "%sFramebuffer-%s*" treemacs--buffer-name-prefix n)))))))

@@ -10,7 +10,8 @@
 ;;; License: GPLv3
 
 (setq spacemacs-evil-packages
-      '(evil-anzu
+      '(
+        evil-anzu
         evil-args
         evil-cleverparens
         evil-ediff
@@ -21,10 +22,6 @@
         evil-indent-plus
         evil-lion
         evil-lisp-state
-        ;; for testing purpose, contribute by reporting bugs and sending PRs
-        ;; to https://github.com/gabesoft/evil-mc
-        ;; To enable it add `(global-evil-mc-mode)' to user-config function
-        evil-mc
         evil-nerd-commenter
         evil-matchit
         evil-numbers
@@ -32,6 +29,7 @@
         ;; Temporarily disabled, pending the resolution of
         ;; https://github.com/7696122/evil-terminal-cursor-changer/issues/8
         ;; evil-terminal-cursor-changer
+        evil-textobj-line
         evil-tutor
         (evil-unimpaired :location (recipe :fetcher local))
         evil-visual-mark-mode
@@ -209,19 +207,6 @@
       (setq evil-lisp-state-global t))
     :config (spacemacs/set-leader-keys "k" evil-lisp-state-map)))
 
-
-(defun spacemacs-evil/init-evil-mc ()
-  (use-package evil-mc
-    :defer t
-    :init
-    (progn
-      ;; evil-mc is not compatible with the paste transient state
-      (define-key evil-normal-state-map "p" 'spacemacs/evil-mc-paste-after)
-      (define-key evil-normal-state-map "P" 'spacemacs/evil-mc-paste-before)
-      (setq evil-mc-one-cursor-show-mode-line-text nil)
-      (when (or (spacemacs/system-is-mac) (spacemacs/system-is-mswindows))
-        (setq evil-mc-enable-bar-cursor nil)))))
-
 ;; other commenting functions in funcs.el with keybinds in keybindings.el
 (defun spacemacs-evil/init-evil-nerd-commenter ()
   (use-package evil-nerd-commenter
@@ -313,6 +298,11 @@
     :defer t
     :init
     (progn
+      ;; `s' for surround instead of `substitute'
+      ;; see motivation here:
+      ;; https://github.com/syl20bnr/spacemacs/blob/develop/doc/DOCUMENTATION.org#the-vim-surround-case
+      (evil-define-key 'visual evil-surround-mode-map "s" 'evil-surround-region)
+      (evil-define-key 'visual evil-surround-mode-map "S" 'evil-substitute)
       (spacemacs|add-transient-hook evil-visual-state-entry-hook
         (lambda () (require 'evil-surround))
         lazy-load-evil-surround)
@@ -321,10 +311,6 @@
         lazy-load-evil-surround-2))
     :config
     (progn
-      ;; `s' for surround instead of `substitute'
-      ;; see motivation for this change in the documentation
-      (evil-define-key 'visual evil-surround-mode-map "s" 'evil-surround-region)
-      (evil-define-key 'visual evil-surround-mode-map "S" 'evil-substitute)
       (global-evil-surround-mode 1))))
 
 (defun spacemacs-evil/init-evil-terminal-cursor-changer ()
@@ -333,6 +319,10 @@
     :init (setq evil-visual-state-cursor 'box
                 evil-insert-state-cursor 'bar
                 evil-emacs-state-cursor 'hbar)))
+
+(defun spacemacs-evil/init-evil-textobj-line ()
+  ;; No laziness here, the line text object should be available right away.
+  (use-package evil-textobj-line))
 
 (defun spacemacs-evil/init-evil-tutor ()
   (use-package evil-tutor

@@ -18,7 +18,8 @@
     (flyspell-correct-helm :toggle (configuration-layer/layer-used-p 'helm))
     (flyspell-correct-popup :toggle (and (not (configuration-layer/layer-used-p 'ivy))
                                          (not (configuration-layer/layer-used-p 'helm))))
-    (flyspell-popup :toggle enable-flyspell-auto-completion)))
+    (flyspell-popup :toggle enable-flyspell-auto-completion)
+    ))
 
 (defun spell-checking/init-auto-dictionary ()
   (use-package auto-dictionary
@@ -90,10 +91,10 @@ Spell Commands^^             Other
 
 (defun spell-checking/init-flyspell-correct ()
   (use-package flyspell-correct
-    :commands (flyspell-correct-word-generic
-               flyspell-correct-previous-word-generic)
+    :commands (flyspell-correct-at-point
+               flyspell-correct-wrapper)
     :init
-    (spacemacs/set-leader-keys "Sc" 'flyspell-correct-previous-word-generic)))
+    (spacemacs/set-leader-keys "Sc" #'flyspell-correct-wrapper)))
 
 (defun spell-checking/init-flyspell-correct-ivy ()
   (use-package flyspell-correct-ivy
