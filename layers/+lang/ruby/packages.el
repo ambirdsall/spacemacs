@@ -289,24 +289,24 @@
           "x\"" 'ruby-tools-to-double-quote-string
           "x:" 'ruby-tools-to-symbol)))))
 
-(defun ruby/init-ruby-test-mode ()
-  "Define keybindings for ruby test mode"
-  (use-package ruby-test-mode)
-    :defer t
-    :init (spacemacs/add-to-hooks 'spacemacs//ruby-enable-ruby-test-mode
-                                  '(ruby-mode-local-vars-hook
-                                    enh-ruby-mode-local-vars-hook))
-    :config
-    (progn
-      ;; `ruby-test-mode' adds a hook to enable itself, this hack
-      ;; removes it to be sure that we control the loading of the
-      ;; mode
-      (remove-hook 'ruby-mode-hook 'ruby-test-enable)
-      (spacemacs|hide-lighter ruby-test-mode)
-      (dolist (mode '(ruby-mode enh-ruby-mode))
-        (spacemacs/set-leader-keys-for-major-mode mode
-          "tb" 'ruby-test-run
-          "tt" 'ruby-test-run-at-point))))
+; (defun ruby/init-ruby-test-mode ()
+;   "Define keybindings for ruby test mode"
+;   (use-package ruby-test-mode
+;     :defer t
+;     :init (spacemacs/add-to-hooks 'spacemacs//ruby-enable-ruby-test-mode
+;                                   '(ruby-mode-local-vars-hook
+;                                     enh-ruby-mode-local-vars-hook))
+;     :config
+;     (progn
+;       ;; `ruby-test-mode' adds a hook to enable itself, this hack
+;       ;; removes it to be sure that we control the loading of the
+;       ;; mode
+;       (remove-hook 'ruby-mode-hook 'ruby-test-enable)
+;       (spacemacs|hide-lighter ruby-test-mode)
+;       (dolist (mode '(ruby-mode enh-ruby-mode))
+;         (spacemacs/set-leader-keys-for-major-mode mode
+;           "tb" 'ruby-test-run
+;           "tt" 'ruby-test-run-at-point)))))
 
 (defun ruby/init-rvm ()
   (use-package rvm

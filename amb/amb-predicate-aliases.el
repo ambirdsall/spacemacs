@@ -1,8 +1,8 @@
 ;;; -*- lexical-binding: t -*-
 
-;; I just really vastly prefer "use question mark as suffix" as an idiom for type predicates to "use
-;; 'p' as a suffix except when it looks really weird or would be misleading because there exists
-;; some other word"
+;; I just really vastly prefer "use question mark as suffix" as an idiom for
+;; type predicates to "use 'p' as a suffix except when it looks really weird or
+;; would be misleading because there exists some other word"
 (defalias 'atom? 'atom)
 (defalias 'buffer? 'bufferp)
 (defalias 'cons? 'consp)
@@ -22,3 +22,5 @@
 (defalias 'bound? 'boundp)
 (defalias 'fbound? 'fboundp)
 (defalias 'use-region? 'use-region-p)
+
+(provide 'amb-predicate-aliases)
