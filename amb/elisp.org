@@ -1,4 +1,0 @@
-#+BEGIN_SRC elisp
-;; maybe use for org/outshine bullets?
-'("🅐" "🅑" "🅒" "🅓")
-#+END_SRC
